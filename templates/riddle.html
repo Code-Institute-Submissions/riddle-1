@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <title>Riddle App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"
+    
+    </head>
+    <body>
+         <div class="text-center"><h1>Welcome to Riddle {% print session['user'] %}</h1></dib>
+         <div class="text-center"><h5>You have {% print correct %} correct answers</h5></div>
+        
+         <div class="text-center">
+        <h3>Question:<h3>
+        <br>
+        <h4>{{data.question}}</h4><br>
+        
+        <form action="/action" method="post">
+          Answer: <input type="text" name="result"><br>
+          <input type="hidden" value={{id}} name="id" />
+          <br>
+          <input type="submit" value="Submit">
+</form>
+ <div class="text-center">
+    </body>
+</html>
