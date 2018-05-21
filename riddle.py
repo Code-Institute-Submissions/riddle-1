@@ -13,9 +13,60 @@ import random
 
 
 app = Flask(__name__)
-engine = create_engine('sqlite:///tutorial.db', echo=True)
+engine = create_engine('sqlite:///riddle.db', echo=True)
 
-data = []
+
+def load_data():
+     data = json.load(open('riddles.json'))
+     return data
+   
+
+    
+data = load_data()
+
+def check_answer(id, result):
+    return result.lower() == data[id]['answer'].lower()
+
+def add_user(user, passw):
+    Session = sessionmaker(bind=engine)
+    s = Session()
+    new_user = User(username=user, password=passw, answers=int(0))
+    s.add(new_user)
+    s.commit()
+ 
+def get_userdb(usern):
+    Session = sessionmaker(bind=engine)
+    s = Session()
+    r = s.query(User).filter_by(username=usern)
+    result = None
+    if r:
+        result = r.first()
+    return result
+
+def get_userdb_p(user, passw):
+    Session = sessionmaker(bind=engine)
+    s = Session()
+    query = s.query(User).filter_by(username=user, password=passw)
+    result = None
+    if query:
+        result = query.first()
+    return result
+    
+    
+def drop_userdb(user):
+    Session = sessionmaker(bind=engine)
+    s = Session()
+    r = s.query(User).filter_by(username=user)
+    if r:
+        result = r.first() 
+        if result:
+            s.delete(result)
+    s.commit()
+    
+
+    
+    
+
 @app.route('/')
 def home():
     if not session.get('logged_in'):
@@ -24,36 +75,28 @@ def home():
         query = s.query(User)
         return render_template('login.html', query=query)
     else:
-        global data
-        data = json.load(open('riddles.json'))
         size = len(data)
         randomq = random.randint(0,size-1)
-        Session = sessionmaker(bind=engine)
-        s = Session()
-        query = s.query(User).filter(User.username.in_([session['user']]))
-        result = query.first()
+        result = get_userdb(session['user'])
         return render_template('riddle.html', data=data[randomq], id=randomq, correct=result.answers)
 
 @app.route("/action", methods=['POST'])
 def action():
-	result = request.form.get("result")
-	id = int(request.form.get("id"))
-	rw = ''
-	if result == data[id]['answer']:
-	    rw = "Correct"
-	    Session = sessionmaker(bind=engine)
-	    s = Session()
-	    	
-	    
-	    our_user = s.query(User).filter_by(username=session['user']).first() 
-	    print(our_user.answers)
-	    our_user.answers += 1
-	    
-	    s.commit()
-	else:
-	    rw =  "Incorrect"
-	    
-	return render_template('answer.html', rw=rw, answer = data[id]['answer'])
+    result = request.form.get("result")
+	
+    id = int(request.form.get("id"))
+    rw = ''
+    if check_answer(id, result):
+        rw = "Correct"
+        Session = sessionmaker(bind=engine)
+        s = Session()
+        our_user = s.query(User).filter_by(username=session['user']).first() 
+        our_user.answers += 1
+        s.commit()
+    else:
+        rw =  "Incorrect"
+        
+    return render_template('answer.html', rw=rw, answer = data[id]['answer'])
 
 
 @app.route('/login', methods=['POST'])
@@ -61,11 +104,8 @@ def do_admin_login():
  
     POST_USERNAME = str(request.form['username'])
     POST_PASSWORD = str(request.form['password'])
- 
-    Session = sessionmaker(bind=engine)
-    s = Session()
-    query = s.query(User).filter(User.username.in_([POST_USERNAME]), User.password.in_([POST_PASSWORD]) )
-    result = query.first()
+    
+    result = get_userdb_p(POST_USERNAME, POST_PASSWORD)
     if result:
         session['logged_in'] = True
         session['user'] = POST_USERNAME
@@ -80,20 +120,13 @@ def do_admin_register():
     POST_USERNAME = str(request.form['username'])
     POST_PASSWORD = str(request.form['password'])
  
-    Session = sessionmaker(bind=engine)
-    s = Session()
-    #query = s.query(User).filter(User.username.in_([POST_USERNAME]), User.password.in_([POST_PASSWORD]) )
-    #result = query.first()
     
-    query = s.query(User).filter(User.username.in_([POST_USERNAME]))
-    result = query.first()
+    result = get_userdb(POST_USERNAME)
 
     if result:
         return('Name taken <br><a href=\'/\'>Try again</a>')
     else:
-        new_user = User(username=POST_USERNAME, password=POST_PASSWORD, answers=int(0))
-        s.add(new_user)
-        s.commit()
+        add_user(POST_USERNAME, POST_PASSWORD)
         return('Username created <br><a href=\'/\'>Login</a>')
     return home()
     
@@ -104,5 +137,4 @@ def logout():
 
 
 app.secret_key = os.urandom(12) 
-app.run(host=os.getenv('IP', '0.0.0.0'),port=int(os.getenv('PORT', 8080)))
 

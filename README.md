@@ -9,4 +9,5 @@ To install:
 1. Install Flash
 2. Install SQLAlchemy library
 3. Run tabledef.py
-4. Run dummy.py
+4. run riddle_server.py
+5. 
