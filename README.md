@@ -43,6 +43,8 @@ Here are some further tests to do manually:
     b. Hit Logout to go to Login page
     c. The leaderboard should display the right number of answers you got
 
+Heroku Deployment: https://riddleproj.herokuapp.com
+
 
 
 
