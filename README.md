@@ -1,4 +1,4 @@
-This is a python backend project of a Riddle Game.
+This is a python backend project of a Riddle Game. The Riddle game allows a user to login, and then the riddle game proceeds to ask the user a riddles. For each riddle the user gets right, he gets a score. The score is stored against his username, should he want to continue at a later date. The riddle game allows multiple users to run the game simultaneously.
 
 The authentication is done with sqlalchemy and using this tutorial as a reference model.
 https://pythonspot.com/login-authentication-with-flask/
