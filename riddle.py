@@ -14,7 +14,7 @@ import random
 
 
 app = Flask(__name__)
-engine = create_engine('sqlite:///riddle.db', echo=True)
+engine = create_engine('sqlite:///riddle.db', echo=False)
 
 
 def load_data():
